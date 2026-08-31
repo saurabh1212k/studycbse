@@ -1,0 +1,9 @@
+streamlit
+supabase
+google-generativeai
+youtube-transcript-api
+pdfplumber
+pyTelegramBotAPI
+beautifulsoup4
+markdownify
+python-dotenv
