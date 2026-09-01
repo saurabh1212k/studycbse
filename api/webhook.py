@@ -7,7 +7,6 @@ import telebot
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from services.db import get_db
-from services.gemini_service import ask_doubt
 
 app = Flask(__name__)
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -41,7 +40,7 @@ def handle_start(message):
             "**Commands:**\n"
             "/plan - Get your 'Today's Study Plan'\n"
             "/add [topic] - Add a chapter to Today's Plan\n"
-            "Just text me any question to use the AI Doubt Solver!"
+            "/math, /science, /sst, /eng, /hindi - View & complete syllabus"
         )
         bot.reply_to(message, welcome_text, parse_mode="Markdown")
     except Exception as e:
@@ -155,16 +154,6 @@ def handle_complete_callback(call):
     except Exception as e:
         bot.answer_callback_query(call.id, f"Error: {e}")
 
-@bot.message_handler(func=lambda message: True)
-def handle_doubt(message):
-    question = message.text
-    try:
-        answer = ask_doubt(question, "General")
-        for i in range(0, len(answer), 4000):
-            bot.send_message(message.chat.id, answer[i:i+4000], parse_mode="Markdown")
-    except Exception as e:
-        bot.reply_to(message, f"Sorry, my AI brain encountered an error: {str(e)}")
-        print(f"Gemini Error: {e}")
 
 # --- VERCEL WEBHOOK ROUTES ---
 

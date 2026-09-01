@@ -70,7 +70,6 @@ with st.sidebar:
     st.page_link("pages/2_Curriculum.py",     label="Curriculum Vault",icon="📘")
     st.page_link("pages/6_Saved_Notes.py",    label="My Saved Notes",  icon="📚")
     st.page_link("pages/7_PDF_Notes.py",      label="PDF Vault",       icon="📁")
-    st.page_link("pages/3_Ingestion.py",      label="Ingestion Engine", icon="⚡")
     st.divider()
     st.caption("v0.1.0 · Phase 1 MVP")
 
@@ -91,8 +90,8 @@ if "timer_seconds"    not in st.session_state: st.session_state.timer_seconds   
 if "timer_start"      not in st.session_state: st.session_state.timer_start      = None
 if "selected_subject" not in st.session_state: st.session_state.selected_subject = "Mathematics"
 
-# ── Layout: 3 columns ─────────────────────────────────────────────────────────
-col_left, col_mid, col_right = st.columns([2, 2, 2], gap="large")
+# ── Layout: 2 columns ─────────────────────────────────────────────────────────
+col_left, col_right = st.columns([5, 4], gap="large")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -199,9 +198,9 @@ with col_left:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MIDDLE COLUMN: Focus Timer (Pomodoro)
+# RIGHT COLUMN: Focus Timer (Pomodoro)
 # ──────────────────────────────────────────────────────────────────────────────
-with col_mid:
+with col_right:
     st.subheader("⏱️ Focus Timer")
 
     # Timer preset selection
@@ -264,44 +263,3 @@ with col_mid:
         st.success(f"🎉 Session complete! Great work on **{st.session_state.selected_subject}**.")
 
     st.markdown("---")
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# RIGHT COLUMN: AI Doubt Solver
-# ──────────────────────────────────────────────────────────────────────────────
-with col_right:
-    st.subheader("🤖 AI Doubt Solver")
-    st.caption("Powered by Gemini · Ask anything CBSE Class 10")
-
-    doubt_subject = st.selectbox(
-        "Subject", ["Mathematics", "Science", "SST", "English", "Hindi"],
-        key="doubt_subject"
-    )
-    doubt_question = st.text_area(
-        "Your Question",
-        placeholder="e.g., Why does magnesium burn with a bright white flame? Explain with equation.",
-        height=130,
-        key="doubt_input",
-    )
-
-    if st.button("✨ Solve My Doubt", type="primary", use_container_width=True):
-        if not doubt_question.strip():
-            st.warning("Please type your question first!")
-        else:
-            with st.spinner("Gemini is thinking..."):
-                try:
-                    from services.gemini_service import ask_doubt
-                    answer = ask_doubt(doubt_question, doubt_subject)
-                    st.session_state["last_answer"] = answer
-                except Exception as e:
-                    st.error(f"Gemini error: {e}\n\nMake sure your GEMINI_API_KEY is set in .env")
-
-    if "last_answer" in st.session_state:
-        st.markdown("---")
-        st.markdown("**📚 Answer:**")
-        st.markdown(st.session_state["last_answer"])
-        col_copy, col_save = st.columns(2)
-        with col_copy:
-            st.button("📋 Copy Answer", use_container_width=True)
-        with col_save:
-            st.button("💾 Save to Notes", use_container_width=True)
