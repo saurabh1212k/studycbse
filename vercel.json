@@ -5,24 +5,20 @@
       "src": "api/webhook.py",
       "use": "@vercel/python",
       "config": {
-      }
-    },
-    {
-      "src": "api/cron.py",
-      "use": "@vercel/python",
-      "config": {
         "maxLambdaSize": "15mb"
       }
     }
   ],
   "routes": [
     {
-      "src": "/api/cron",
-      "dest": "/api/cron.py"
-    },
-    {
       "src": "/(.*)",
       "dest": "/api/webhook.py"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "30 2 * * *"
     }
   ]
 }

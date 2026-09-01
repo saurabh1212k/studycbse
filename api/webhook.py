@@ -200,6 +200,49 @@ def set_webhook():
     else:
         return "❌ Failed to set webhook", 500
 
+@app.route('/api/cron', methods=['GET', 'POST'])
+def daily_briefing():
+    try:
+        from datetime import date
+        today = date.today().isoformat()
+        
+        # We fetch all tasks in progress or scheduled for today
+        chaps = get_db().table("chapters").select("name, scheduled_for").eq("status", "in_progress").execute()
+        
+        if not chaps.data:
+            return jsonify({"status": "ok", "message": "No tasks for today"})
+            
+        msg = f"🌅 **Good Morning! Here is your Study Plan for today:**\n\n"
+        for i, c in enumerate(chaps.data):
+            time_str = ""
+            if c.get("scheduled_for"):
+                try:
+                    time_str = " 🕒 " + c["scheduled_for"].split("T")[1][:5]
+                except:
+                    pass
+            msg += f"{i+1}. {c['name']}{time_str}\n"
+            
+        msg += "\n*Let's crush it today!* 🚀"
+        
+        # We need the user's chat ID. Since we don't store it globally (we only have an id in users),
+        # but wait, the users table DOES have telegram_chat_id ?
+        # Actually I need to verify if users table has telegram_chat_id.
+        # But wait, earlier I updated /start to store the chat_id in users!
+        users = get_db().table("users").select("telegram_chat_id").execute()
+        sent = 0
+        for u in users.data:
+            chat_id = u.get("telegram_chat_id")
+            if chat_id:
+                try:
+                    bot.send_message(chat_id, msg, parse_mode="Markdown")
+                    sent += 1
+                except:
+                    pass
+                
+        return jsonify({"status": "ok", "message": f"Briefing sent to {sent} users"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
