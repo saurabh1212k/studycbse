@@ -129,6 +129,11 @@ def set_webhook():
     else:
         return "❌ Failed to set webhook", 500
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return "🤖 StudyOS Telegram Bot is alive and running on Vercel! To activate it, go to /api/set_webhook"
+
 # Vercel requires the app variable to be exposed
 if __name__ == '__main__':
     app.run(debug=True)
