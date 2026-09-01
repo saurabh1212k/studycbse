@@ -25,12 +25,10 @@ Instructions:
 - End with a "Key Takeaway" in one sentence.
 """
 
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY.strip()}"
     
-    # Passing the key explicitly in the header fixes the SDK bug!
     headers = {
-        "Content-Type": "application/json",
-        "x-goog-api-key": API_KEY.strip()
+        "Content-Type": "application/json"
     }
     
     data = {
