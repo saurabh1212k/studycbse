@@ -7,3 +7,4 @@ pyTelegramBotAPI
 beautifulsoup4
 markdownify
 python-dotenv
+Flask
