@@ -121,11 +121,33 @@ with col_left:
                 with col_check:
                     is_done = st.checkbox("", key=f"chap_{chap['id']}", label_visibility="collapsed")
                 with col_info:
+                    import urllib.parse
+                    import datetime
                     subject_name = chap["subjects"]["name"] if chap.get("subjects") else "General"
                     subject_color = chap["subjects"]["color_hex"] if chap.get("subjects") else "#818cf8"
                     subject_style = f'background-color:{subject_color}22; color:{subject_color}; border:1px solid {subject_color}55'
+                    
+                    time_str = ""
+                    cal_link = ""
+                    if chap.get("scheduled_for"):
+                        try:
+                            # Safely parse the timestamp
+                            dt_str = chap["scheduled_for"].replace("Z", "+00:00") if "Z" in chap["scheduled_for"] else chap["scheduled_for"]
+                            dt_obj = datetime.datetime.fromisoformat(dt_str)
+                            time_str = f" <span style='font-size:0.8em; color:#9ca3af'>🕒 {dt_obj.strftime('%I:%M %p')}</span>"
+                            
+                            # Build Calendar URL
+                            start_str = dt_obj.strftime('%Y%m%dT%H%M%S')
+                            end_obj = dt_obj + datetime.timedelta(hours=1)
+                            end_str = end_obj.strftime('%Y%m%dT%H%M%S')
+                            title_enc = urllib.parse.quote(f"Study: {chap['name']}")
+                            cal_url = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={title_enc}&dates={start_str}/{end_str}"
+                            cal_link = f" <a href='{cal_url}' target='_blank' style='text-decoration:none' title='Add to Google Calendar'>📅</a>"
+                        except Exception as dt_err:
+                            pass
+
                     st.markdown(
-                        f'<span class="subject-pill" style="{subject_style}">{subject_name}</span> {chap["name"]}',
+                        f'<span class="subject-pill" style="{subject_style}">{subject_name}</span> {chap["name"]}{time_str}{cal_link}',
                         unsafe_allow_html=True,
                     )
                 with col_del:
@@ -138,7 +160,19 @@ with col_left:
                     st.rerun()
 
         st.markdown("---")
-        st.subheader("🔍 Search & Add")
+        st.subheader("🔍 Search & Schedule")
+        st.markdown("Set a time, then add a chapter below!")
+        
+        col_d, col_t = st.columns(2)
+        with col_d:
+            sched_date = st.date_input("Date to study:")
+        with col_t:
+            sched_time = st.time_input("Time to study:")
+            
+        import datetime
+        import urllib.parse
+        sched_dt = datetime.datetime.combine(sched_date, sched_time).isoformat()
+        
         search_q = st.text_input("Find chapters (e.g. '#physics light')", placeholder="#science, #history, or chapter name...")
         
         if search_q.strip():
@@ -171,7 +205,7 @@ with col_left:
                     sub_color = res["subjects"]["color_hex"] if res.get("subjects") else "#ffffff"
                     c1.markdown(f"<span style='color:{sub_color}'>**{res['subjects']['name']}**</span>: {res['name']}", unsafe_allow_html=True)
                     if c2.button("➕ Add", key=f"add_{res['id']}"):
-                        db.table("chapters").update({"status": "in_progress"}).eq("id", res["id"]).execute()
+                        db.table("chapters").update({"status": "in_progress", "scheduled_for": sched_dt, "is_reminded": False}).eq("id", res["id"]).execute()
                         st.rerun()
             
         st.markdown("---")
@@ -189,8 +223,7 @@ with col_left:
                     else:
                         res = db.table("subjects").insert({"name": "Custom Topics", "user_id": uid, "color_hex": "#9ca3af"}).execute()
                         sub_id = res.data[0]['id']
-                    
-                    db.table("chapters").insert({"subject_id": sub_id, "name": custom_q.strip(), "status": "in_progress"}).execute()
+                    db.table("chapters").insert({"subject_id": sub_id, "name": custom_q.strip(), "status": "in_progress", "scheduled_for": sched_dt, "is_reminded": False}).execute()
                     st.rerun()
             
     except Exception as e:
