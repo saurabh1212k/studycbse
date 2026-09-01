@@ -305,25 +305,3 @@ with col_right:
             st.button("📋 Copy Answer", use_container_width=True)
         with col_save:
             st.button("💾 Save to Notes", use_container_width=True)
-
-    st.markdown("---")
-    st.subheader("🔥 Chapter Progress")
-    try:
-        from services.db import get_db
-        db = get_db()
-        subs = db.table("subjects").select("id, name, color_hex").execute()
-        chaps = db.table("chapters").select("subject_id, status").execute()
-        
-        if not subs.data:
-            st.info("No subjects found.")
-        else:
-            for sub in subs.data:
-                sub_chaps = [c for c in chaps.data if c["subject_id"] == sub["id"]]
-                total = len(sub_chaps)
-                if total > 0:
-                    completed = len([c for c in sub_chaps if c["status"] == "completed"])
-                    progress = completed / total
-                    st.markdown(f"**{sub['name']}**")
-                    st.progress(progress, text=f"{completed}/{total} completed")
-    except Exception as e:
-        st.error(f"Could not load progress: {e}")
