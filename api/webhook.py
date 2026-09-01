@@ -13,7 +13,8 @@ app = Flask(__name__)
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 if BOT_TOKEN:
-    bot = telebot.TeleBot(BOT_TOKEN)
+    # IMPORTANT: Vercel kills background threads, so we must run synchronously
+    bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
     db = get_db()
 else:
     bot = None
