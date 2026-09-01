@@ -89,6 +89,72 @@ def handle_add(message):
     except Exception as e:
         bot.send_message(message.chat.id, f"Database Error: {e}")
 
+@bot.message_handler(commands=['math', 'eng', 'hindi', 'sst', 'science'])
+def handle_subject_tags(message):
+    cmd = message.text.split()[0].lower()
+    
+    # Map commands to actual database subject names
+    if cmd == '/math':
+        query = ['Mathematics']
+    elif cmd == '/science':
+        query = ['Physics', 'Chemistry', 'Biology']
+    elif cmd == '/sst':
+        query = ['History', 'Geography', 'Civics', 'Economics']
+    elif cmd == '/eng':
+        query = ['Eng: First Flight', 'Eng: Footprints Without Feet']
+    elif cmd == '/hindi':
+        query = ['Hindi: Kshitij', 'Hindi: Kritika']
+    else:
+        return
+        
+    try:
+        # Fetch all subjects to get their IDs
+        subs = db.table('subjects').select('id, name').execute()
+        target_sub_ids = [s['id'] for s in subs.data if any(q in s['name'] for q in query)]
+        
+        if not target_sub_ids:
+            bot.send_message(message.chat.id, f"No subjects found for {cmd}.")
+            return
+            
+        # Fetch pending chapters for those subjects
+        chapters = db.table('chapters').select('id, name').in_('subject_id', target_sub_ids).neq('status', 'completed').execute()
+        
+        if not chapters.data:
+            bot.send_message(message.chat.id, f"🎉 You have no pending chapters in {cmd}! Everything is completed.")
+            return
+            
+        # Build Inline Keyboard with Tick Boxes
+        markup = telebot.types.InlineKeyboardMarkup()
+        for chap in chapters.data:
+            btn = telebot.types.InlineKeyboardButton(f"⬜ {chap['name']}", callback_data=f"done_{chap['id']}")
+            markup.add(btn)
+            
+        bot.send_message(message.chat.id, f"📚 **Pending Syllabus for {cmd}**\nClick a box to mark it as Completed:", reply_markup=markup, parse_mode="Markdown")
+        
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Error: {e}")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('done_'))
+def handle_complete_callback(call):
+    chap_id = call.data.split('_')[1]
+    try:
+        # Mark as completed in DB
+        db.table('chapters').update({'status': 'completed'}).eq('id', chap_id).execute()
+        
+        # Fetch chapter name for the confirmation message
+        chap = db.table('chapters').select('name').eq('id', chap_id).execute()
+        chap_name = chap.data[0]['name'] if chap.data else "Chapter"
+        
+        # Answer the callback so the loading spinner on the button stops
+        bot.answer_callback_query(call.id, "Marked as Completed! 🎉")
+        
+        # Send a confirmation message
+        bot.send_message(call.message.chat.id, f"✅ Marked **{chap_name}** as Completed!", parse_mode="Markdown")
+        
+        # Note: We don't delete the big button list so they can keep checking off other chapters!
+    except Exception as e:
+        bot.answer_callback_query(call.id, f"Error: {e}")
+
 @bot.message_handler(func=lambda message: True)
 def handle_doubt(message):
     question = message.text
