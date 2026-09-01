@@ -164,7 +164,8 @@ def handle_doubt(message):
         from services.gemini_service import ask_doubt
         answer = ask_doubt(question, "General")
         for i in range(0, len(answer), 4000):
-            bot.send_message(message.chat.id, answer[i:i+4000], parse_mode="Markdown")
+            # We remove parse_mode="Markdown" because Telegram crashes if Gemini uses unclosed symbols
+            bot.send_message(message.chat.id, answer[i:i+4000])
     except Exception as e:
         bot.reply_to(message, f"Sorry, my AI brain encountered an error: {str(e)}")
         print(f"Gemini Error: {e}")
