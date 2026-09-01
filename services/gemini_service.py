@@ -12,8 +12,8 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Use the latest available models as recommended by the API
-_flash_model = genai.GenerativeModel("gemini-3.6-flash") # Keep flash for fast, simple tasks like summarization
-_pro_model   = genai.GenerativeModel("gemini-pro-latest") # Upgrade to Pro for deep reasoning (Grading, Math doubts)
+_flash_model = genai.GenerativeModel("gemini-1.5-flash") # Keep flash for fast, simple tasks like summarization
+_pro_model   = genai.GenerativeModel("gemini-1.5-pro") # Upgrade to Pro for deep reasoning (Grading, Math doubts)
 
 
 def ask_doubt(question: str, subject: str = "General") -> str:
