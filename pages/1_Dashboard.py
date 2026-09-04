@@ -84,6 +84,22 @@ with col_date:
 
 st.divider()
 
+# ── Midterm Marathon ───────────────────────────────────────────────────────────
+with st.expander("🔥 Midterm Marathon Timetable (Sep 5 - 16)", expanded=True):
+    st.markdown("""
+| Date | Subject Focus | Chapters / Goals |
+| :--- | :--- | :--- |
+| **Sep 5-6** | 📐 Maths | Ch 7, 14, 6 (PYQ Practice) |
+| **Sep 7** | 📊 Economics | Ch 1, 2 |
+| **Sep 8** | 🧬 Biology | Whole Biology Revision |
+| **Sep 9** | 🌍 Geography | Whole Geography Revision |
+| **Sep 10** | 🏛️ Civics & 📐 Maths | Civics Ch 3 + Start Trigonometry |
+| **Sep 11** | 📐 Maths | Trigonometry |
+| **Sep 12-13** | 🏛️ Civics & 📐 Maths | Civics Ch 1, 2, 3 and Maths Ch 1, 2, 3 |
+| **Sep 14-15** | 🧪 Chem & 📜 History | Chem Ch 1, 2 and History Ch 1, 2 |
+| **Sep 16** | ⚡ Physics | Ch 1, 2 |
+    """)
+
 # ── Initialize session state ───────────────────────────────────────────────────
 if "timer_running"    not in st.session_state: st.session_state.timer_running    = False
 if "timer_seconds"    not in st.session_state: st.session_state.timer_seconds    = 25 * 60

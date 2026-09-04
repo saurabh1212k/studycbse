@@ -40,12 +40,30 @@ def handle_start(message):
             "**Commands:**\n"
             "/plan - Get your 'Today's Study Plan'\n"
             "/add [topic] - Add a chapter to Today's Plan\n"
+            "/mid - View Midterm Marathon Syllabus\n"
             "/math, /science, /sst, /eng, /hindi - View & complete syllabus\n\n"
             "Just text me any question to use the AI Doubt Solver!"
         )
         bot.reply_to(message, welcome_text, parse_mode="Markdown")
     except Exception as e:
         bot.reply_to(message, f"Database Error: {e}")
+
+@bot.message_handler(commands=['mid'])
+def handle_midterm(message):
+    midterm_text = (
+        "🔥 **Midterm Marathon Timetable (Sep 5 - 16)**\n\n"
+        "📅 **Sep 5-6**\n📐 Maths: Ch 7, 14, 6 (PYQ Practice)\n\n"
+        "📅 **Sep 7**\n📊 Economics: Ch 1, 2\n\n"
+        "📅 **Sep 8**\n🧬 Biology: Whole Biology Revision\n\n"
+        "📅 **Sep 9**\n🌍 Geography: Whole Geography Revision\n\n"
+        "📅 **Sep 10**\n🏛️ Civics & 📐 Maths: Civics Ch 3 + Start Trigonometry\n\n"
+        "📅 **Sep 11**\n📐 Maths: Trigonometry\n\n"
+        "📅 **Sep 12-13**\n🏛️ Civics & 📐 Maths: Civics Ch 1-3, Maths Ch 1-3\n\n"
+        "📅 **Sep 14-15**\n🧪 Chem & 📜 History: Chem Ch 1-2, History Ch 1-2\n\n"
+        "📅 **Sep 16**\n⚡ Physics: Ch 1, 2\n\n"
+        "🚀 *Let's crush this midterm!*"
+    )
+    bot.send_message(message.chat.id, midterm_text, parse_mode="Markdown")
 
 @bot.message_handler(commands=['plan'])
 def handle_plan(message):
