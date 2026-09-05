@@ -103,6 +103,7 @@ with st.expander("🔥 Midterm Marathon Timetable (Sep 5 - 16)", expanded=True):
 # ── Initialize session state ───────────────────────────────────────────────────
 if "timer_running"    not in st.session_state: st.session_state.timer_running    = False
 if "timer_seconds"    not in st.session_state: st.session_state.timer_seconds    = 25 * 60
+if "timer_total"      not in st.session_state: st.session_state.timer_total      = 25 * 60
 if "timer_start"      not in st.session_state: st.session_state.timer_start      = None
 if "selected_subject" not in st.session_state: st.session_state.selected_subject = "Mathematics"
 
@@ -255,14 +256,17 @@ with col_right:
     with preset_col1:
         if st.button("🍅 25 min", use_container_width=True):
             st.session_state.timer_seconds = 25 * 60
+            st.session_state.timer_total = 25 * 60
             st.session_state.timer_running = False
     with preset_col2:
         if st.button("📖 45 min", use_container_width=True):
             st.session_state.timer_seconds = 45 * 60
+            st.session_state.timer_total = 45 * 60
             st.session_state.timer_running = False
     with preset_col3:
         if st.button("☕ 5 min", use_container_width=True):
             st.session_state.timer_seconds = 5 * 60
+            st.session_state.timer_total = 5 * 60
             st.session_state.timer_running = False
 
     # Subject selector for the session
@@ -273,6 +277,8 @@ with col_right:
 
     # Timer display
     secs = st.session_state.timer_seconds
+    total_secs = st.session_state.timer_total
+    
     mins_display = secs // 60
     secs_display = secs % 60
     timer_placeholder = st.empty()
@@ -282,8 +288,9 @@ with col_right:
     )
 
     # Ring progress
-    pct = 1 - (secs / (25 * 60))   # rough progress for default 25 min
-    st.progress(min(pct, 1.0), text="Session progress")
+    pct = 1 - (secs / total_secs) if total_secs > 0 else 0
+    clamped_pct = max(0.0, min(1.0, pct))
+    st.progress(clamped_pct, text="Session progress")
 
     # Controls
     ctrl1, ctrl2, ctrl3 = st.columns(3)
@@ -297,7 +304,7 @@ with col_right:
     with ctrl3:
         if st.button("🔄 Reset", use_container_width=True):
             st.session_state.timer_running = False
-            st.session_state.timer_seconds = 25 * 60
+            st.session_state.timer_seconds = st.session_state.timer_total
 
     # Countdown tick (re-runs every second while timer is active)
     if st.session_state.timer_running and st.session_state.timer_seconds > 0:
