@@ -1,9 +1,17 @@
 streamlit
 supabase
+python-dotenv
+pandas
+google-genai
+
+# --- Optional: only needed for the Ingestion Engine (services/ingestion.py) ---
 youtube-transcript-api
 pdfplumber
-pyTelegramBotAPI
+
+# --- Optional: only needed for the web scraper (services/web_extractor.py) ---
+requests
 beautifulsoup4
 markdownify
-python-dotenv
-Flask
+
+# --- Optional: only needed to run the Telegram bot locally (scripts/run_bot.py) ---
+pyTelegramBotAPI

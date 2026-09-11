@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import markdownify
-from services.gemini_service import _pro_model
+from services.gemini_service import _gemini_rest_call
 
 def scrape_notes_from_url(url: str) -> str:
     """Scrapes an educational URL and returns clean markdown notes."""
@@ -35,7 +35,7 @@ def scrape_notes_from_url(url: str) -> str:
         return f"Error scraping {url}: {e}"
 
 def generate_extra_questions(context_md: str) -> str:
-    """Uses Gemini Pro to generate extra questions based ONLY on the scraped context."""
+    """Uses Gemini to generate extra questions based ONLY on the scraped context."""
     prompt = f"""You are a CBSE Class 10 Examiner. 
 Based ONLY on the provided study notes below, generate 5 challenging "Extra Questions" (a mix of short and long answer types).
 Provide the question first, followed by a detailed answer key.
@@ -46,7 +46,6 @@ Study Notes Context:
 Format output purely in Markdown.
 """
     try:
-        res = _pro_model.generate_content(prompt)
-        return res.text
+        return _gemini_rest_call(prompt)
     except Exception as e:
         return f"Error generating questions: {e}"

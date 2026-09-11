@@ -204,7 +204,11 @@ with col_left:
             
         if st.button("➕ Create & Add to Plan", use_container_width=True):
             if custom_q.strip():
-                uid = db.table("users").select("id").limit(1).execute().data[0]['id']
+                users = db.table("users").select("id").limit(1).execute()
+                if not users.data:
+                    st.error("No user found in the database. Run `phase4_migration.sql` in Supabase first (it creates the default user).")
+                    st.stop()
+                uid = users.data[0]['id']
                 subs = db.table("subjects").select("id").eq("name", "Custom Topics").execute()
                 if subs.data:
                     sub_id = subs.data[0]['id']
