@@ -85,19 +85,58 @@ with col_date:
 st.divider()
 
 # ── Curated Syllabus Status ───────────────────────────────────────────────────
-with st.expander("📊 Current Syllabus Status (Done, Revise, Left)", expanded=True):
-    st.markdown("""
-| Subject | ✅ Done | 🔄 Needs Revision | ❌ Not Done |
-| :--- | :--- | :--- | :--- |
-| **📐 Maths** | Ch 1, 2, 3, 7, 14 | Ch 4, 5, 6, 8 | Ch 9, 10, 11, 12, 13 |
-| **📜 History** | Ch 2 | Ch 1 | Ch 3, 4, 5 |
-| **🏛️ Civics** | Ch 1, 2, 3 | Ch 4 | Ch 5 |
-| **🌍 Geography** | Ch 1, 2, 3 | Ch 4 | Ch 5, 6, 7 |
-| **📊 Economics** | - | Ch 1, 2 | Ch 3, 4, 5 |
-| **⚡ Physics** | Ch 2 | Ch 1 | Ch 3, 4 |
-| **🧪 Chemistry** | Ch 1, 2 | - | Ch 3, 4 |
-| **🧬 Biology** | Ch 1 | Ch 2 | Ch 3, 4, 5 |
-    """)
+with st.expander("📊 Action Center: Needs Revision & Not Done", expanded=True):
+    pending_chaps = db.table("chapters").select("id, name, status, subjects(name)").neq("status", "completed").execute()
+    if pending_chaps.data:
+        import pandas as pd
+        
+        table_data = []
+        for c in pending_chaps.data:
+            sub_name = c["subjects"]["name"] if c.get("subjects") else "Unknown"
+            if sub_name == "Custom Topics": continue
+                
+            table_data.append({
+                "_id": c["id"],
+                "Subject": sub_name,
+                "Chapter": c["name"],
+                "Status": "🔄 Revise" if c["status"] == "in_progress" else "❌ Not Done",
+                "Mark Done": False
+            })
+            
+        if table_data:
+            df_pending = pd.DataFrame(table_data)
+            # Sort so subjects are grouped together
+            df_pending = df_pending.sort_values(by=["Subject", "Status", "Chapter"])
+            
+            st.markdown("Tick the box next to any chapter to instantly mark it as **Done** globally in your Curriculum.")
+            
+            edited_df = st.data_editor(
+                df_pending[["Subject", "Chapter", "Status", "Mark Done"]],
+                column_config={
+                    "Subject": st.column_config.TextColumn(disabled=True),
+                    "Chapter": st.column_config.TextColumn(disabled=True, width="large"),
+                    "Status": st.column_config.TextColumn(disabled=True),
+                    "Mark Done": st.column_config.CheckboxColumn("✅ Mark Done", default=False)
+                },
+                hide_index=True,
+                use_container_width=True,
+                key="dashboard_action_center"
+            )
+            
+            # Detect checked boxes
+            changed = False
+            for i in range(len(edited_df)):
+                if edited_df.iloc[i]["Mark Done"]:
+                    chap_id = df_pending.iloc[i]["_id"]
+                    db.table("chapters").update({"status": "completed"}).eq("id", chap_id).execute()
+                    changed = True
+                    
+            if changed:
+                st.rerun()
+        else:
+            st.success("🎉 You have completed the entire syllabus! Amazing!")
+    else:
+        st.success("🎉 You have completed the entire syllabus! Amazing!")
 
 
 # ── Initialize session state ───────────────────────────────────────────────────
