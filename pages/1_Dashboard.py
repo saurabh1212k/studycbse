@@ -84,6 +84,20 @@ with col_date:
 
 st.divider()
 
+# ── Syllabus Progress Overview ──────────────────────────────────────────────────
+with st.expander("📊 Current Syllabus Status", expanded=True):
+    st.markdown("""
+| Subject | Done ✅ | Needs Revision 🔄 | Not Done ❌ |
+| :--- | :--- | :--- | :--- |
+| **📐 Maths** | Ch 1, 2, 3, 7, 14 | Ch 4, 5, 6, 8 | Ch 9, 10, 11, 12, 13 |
+| **📜 History** | Ch 2 | Ch 1 | All others |
+| **🏛️ Civics** | Ch 1, 2, 3 | Ch 4 | All others |
+| **🌍 Geography** | Ch 1, 2, 3 | Ch 4 | All others |
+| **📊 Economics** | *None* | Ch 1, 2 | All others |
+| **⚡ Physics** | Ch 2 | Ch 1 | All others |
+| **🧪 Chemistry** | Ch 1, 2 | *None* | All others |
+| **🧬 Biology** | Ch 1 | Ch 2 | All others |
+    """)
 
 # ── Initialize session state ───────────────────────────────────────────────────
 if "timer_running"    not in st.session_state: st.session_state.timer_running    = False
