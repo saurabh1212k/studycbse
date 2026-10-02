@@ -186,9 +186,49 @@ def handle_start(message):
             "**Commands:**\n"
             "/plan - Get your 'Today's Study Plan'\n"
             "/add [topic] - Add a chapter to Today's Plan\n"
-            "/math, /science, /sst, /eng, /hindi - Syllabus book-wise (tap a chapter to complete it)"
+            "/math, /science, /sst, /eng, /hindi - Syllabus pending chapters\n"
+            "/donechaps_math, /donechaps_science, etc. - View completed chapters"
         )
         bot.reply_to(message, welcome_text, parse_mode="Markdown")
+    except Exception as e:
+        bot.reply_to(message, f"Database Error: {e}")
+
+@bot.message_handler(commands=['donechaps_math', 'donechaps_sst', 'donechaps_science', 'donechaps_eng', 'donechaps_hindi'])
+def handle_donechaps(message):
+    cmd = message.text.split('@')[0].strip('/').replace('donechaps_', '')
+    if cmd not in SUBJECT_VIEWS:
+        return
+        
+    sub_names = SUBJECT_VIEWS[cmd]
+    label = VIEW_LABELS[cmd]
+    
+    try:
+        # Fetch all completed chapters
+        chaps_res = db.table("chapters").select("name, subjects(name)").eq("status", "completed").execute()
+        if not chaps_res.data:
+            bot.send_message(message.chat.id, f"No completed chapters found in {label} yet. Keep going! 💪")
+            return
+            
+        from collections import defaultdict
+        grouped = defaultdict(list)
+        for c in chaps_res.data:
+            s_name = c["subjects"]["name"] if c.get("subjects") else ""
+            if s_name in sub_names:
+                grouped[s_name].append(c["name"])
+                
+        if not grouped:
+            bot.send_message(message.chat.id, f"No completed chapters found in {label} yet. Keep going! 💪")
+            return
+            
+        msg = f"✅ **Completed Chapters in {label}:**\n\n"
+        for s_name in sub_names:
+            if s_name in grouped:
+                msg += f"📖 *{s_name}*\n"
+                for chap in grouped[s_name]:
+                    msg += f"  • {chap}\n"
+                msg += "\n"
+                
+        bot.send_message(message.chat.id, msg, parse_mode="Markdown")
     except Exception as e:
         bot.reply_to(message, f"Database Error: {e}")
 
