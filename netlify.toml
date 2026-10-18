@@ -5,7 +5,7 @@
 [functions]
   external_node_modules = []
 
-# ── Redirect bot traffic to the Netlify function ─────────────────────────────
+# ── Redirect bot traffic to the Netlify functions ─────────────────────────────
 [[redirects]]
   from = "/api/webhook"
   to   = "/.netlify/functions/webhook"
@@ -24,11 +24,6 @@
   status = 200
   force  = true
 
-# Catch-all root redirect
-[[redirects]]
-  from = "/*"
-  to   = "/.netlify/functions/webhook"
-  status = 200
 
 # ── Scheduled morning briefing at 8:00 AM IST (2:30 AM UTC) ─────────────────
 [functions."cron"]
