@@ -1,5 +1,0 @@
-Flask
-pyTelegramBotAPI
-supabase
-python-dotenv
-google-genai

@@ -3,15 +3,10 @@ supabase
 python-dotenv
 pandas
 google-genai
+requests
 
-# --- Optional: only needed for the Ingestion Engine (services/ingestion.py) ---
+# --- Optional: for Ingestion Engine and Web Extractor ---
 youtube-transcript-api
 pdfplumber
-
-# --- Optional: only needed for the web scraper (services/web_extractor.py) ---
-requests
 beautifulsoup4
 markdownify
-
-# --- Optional: only needed to run the Telegram bot locally (scripts/run_bot.py) ---
-pyTelegramBotAPI

@@ -4,7 +4,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+
+def _get_api_key() -> str | None:
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            return str(st.secrets["GEMINI_API_KEY"]).strip()
+    except Exception:
+        pass
+    val = os.getenv("GEMINI_API_KEY")
+    return val.strip() if val else None
 
 
 def _gemini_rest_call(prompt: str, model: str = "gemini-2.0-flash", max_retries: int = 2) -> str:
@@ -12,14 +21,16 @@ def _gemini_rest_call(prompt: str, model: str = "gemini-2.0-flash", max_retries:
     Calls the Gemini REST API directly using the x-goog-api-key header.
     Works with standard AI Studio keys (AIza...) and avoids SDK auth quirks.
     """
-    if not API_KEY:
+    api_key = _get_api_key()
+    if not api_key:
         raise Exception(
             "Missing GEMINI_API_KEY. Add it to your .env file "
-            "(get a free key at https://aistudio.google.com/apikey)"
+            "(get a free key at https://aistudio.google.com/apikey) "
+            "or in Streamlit Cloud App Settings → Secrets."
         )
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-    headers = {"x-goog-api-key": API_KEY.strip()}
+    headers = {"x-goog-api-key": api_key.strip()}
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
 
     last_err = None

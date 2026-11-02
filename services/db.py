@@ -12,16 +12,29 @@ load_dotenv()
 _client: Client | None = None
 
 
+def get_secret(key_name: str) -> str | None:
+    """Gets a secret from Streamlit secrets (for Streamlit Cloud) or os.environ (local .env)."""
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and key_name in st.secrets:
+            return str(st.secrets[key_name]).strip()
+    except Exception:
+        pass
+    val = os.getenv(key_name)
+    return val.strip() if val else None
+
+
 def get_db() -> Client:
     """Returns a singleton Supabase client instance."""
     global _client
     if _client is None:
-        url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_ANON_KEY")
+        url = get_secret("SUPABASE_URL")
+        key = get_secret("SUPABASE_ANON_KEY")
         if not url or not key:
             raise ValueError(
-                "❌ Missing SUPABASE_URL or SUPABASE_ANON_KEY in your .env file.\n"
-                "Copy .env.example → .env and fill in your credentials."
+                "❌ Missing SUPABASE_URL or SUPABASE_ANON_KEY.\n"
+                "For local: add them to your .env file.\n"
+                "For Streamlit Cloud: add them to App Settings → Secrets."
             )
         _client = create_client(url, key)
     return _client

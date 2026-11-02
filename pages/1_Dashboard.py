@@ -84,6 +84,15 @@ with col_date:
 
 st.divider()
 
+# ── Database Client ────────────────────────────────────────────────────────────
+try:
+    from services.db import get_db
+    db = get_db()
+except Exception as e:
+    st.error(f"⚠️ Could not connect to Database: {e}")
+    st.info("If running on Streamlit Cloud, ensure `SUPABASE_URL` and `SUPABASE_ANON_KEY` are configured in App Settings → Secrets.")
+    st.stop()
+
 # ── Curated Syllabus Status ───────────────────────────────────────────────────
 with st.expander("📊 Action Center: Needs Revision & Not Done", expanded=True):
     pending_chaps = db.table("chapters").select("id, name, status, subjects(name)").neq("status", "completed").execute()
@@ -158,9 +167,6 @@ with col_left:
     st.markdown("Your active chapters for today:")
     
     try:
-        from services.db import get_db
-        db = get_db()
-        
         # 1. Show only 'in_progress' chapters
         active_chaps = db.table("chapters").select("*, subjects(name, color_hex)").eq("status", "in_progress").execute()
         
