@@ -93,57 +93,90 @@ except Exception as e:
     st.info("If running on Streamlit Cloud, ensure `SUPABASE_URL` and `SUPABASE_ANON_KEY` are configured in App Settings → Secrets.")
     st.stop()
 
-# ── Curated Syllabus Status ───────────────────────────────────────────────────
-with st.expander("📊 Action Center: Needs Revision & Not Done", expanded=True):
+# ── Curated Syllabus Status & Revision Section ───────────────────────────────
+with st.expander("📚 Action Center & Revision Hub", expanded=True):
     pending_chaps = db.table("chapters").select("id, name, status, subjects(name)").neq("status", "completed").execute()
     if pending_chaps.data:
         import pandas as pd
         
-        table_data = []
+        revise_list = []
+        not_done_list = []
+        
         for c in pending_chaps.data:
             sub_name = c["subjects"]["name"] if c.get("subjects") else "Unknown"
-            if sub_name == "Custom Topics": continue
+            if sub_name == "Custom Topics":
+                continue
                 
-            table_data.append({
+            item = {
                 "_id": c["id"],
                 "Subject": sub_name,
                 "Chapter": c["name"],
-                "Status": "🔄 Revise" if c["status"] == "in_progress" else "❌ Not Done",
                 "Mark Done": False
-            })
-            
-        if table_data:
-            df_pending = pd.DataFrame(table_data)
-            # Sort so subjects are grouped together
-            df_pending = df_pending.sort_values(by=["Subject", "Status", "Chapter"])
-            
-            st.markdown("Tick the box next to any chapter to instantly mark it as **Done** globally in your Curriculum.")
-            
-            edited_df = st.data_editor(
-                df_pending[["Subject", "Chapter", "Status", "Mark Done"]],
-                column_config={
-                    "Subject": st.column_config.TextColumn(disabled=True),
-                    "Chapter": st.column_config.TextColumn(disabled=True, width="large"),
-                    "Status": st.column_config.TextColumn(disabled=True),
-                    "Mark Done": st.column_config.CheckboxColumn("✅ Mark Done", default=False)
-                },
-                hide_index=True,
-                use_container_width=True,
-                key="dashboard_action_center"
-            )
-            
-            # Detect checked boxes
-            changed = False
-            for i in range(len(edited_df)):
-                if edited_df.iloc[i]["Mark Done"]:
-                    chap_id = df_pending.iloc[i]["_id"]
-                    db.table("chapters").update({"status": "completed"}).eq("id", chap_id).execute()
-                    changed = True
-                    
-            if changed:
-                st.rerun()
-        else:
-            st.success("🎉 You have completed the entire syllabus! Amazing!")
+            }
+            if c["status"] == "in_progress":
+                revise_list.append(item)
+            else:
+                not_done_list.append(item)
+                
+        tab_rev, tab_not_done = st.tabs([
+            f"🔄 Revision Section ({len(revise_list)})",
+            f"❌ Not Done Yet ({len(not_done_list)})"
+        ])
+        
+        with tab_rev:
+            if revise_list:
+                df_rev = pd.DataFrame(revise_list).sort_values(by=["Subject", "Chapter"])
+                st.markdown("These chapters need **revision**. Check the box once you finish revising to mark them **Done**.")
+                edited_rev = st.data_editor(
+                    df_rev[["Subject", "Chapter", "Mark Done"]],
+                    column_config={
+                        "Subject": st.column_config.TextColumn(disabled=True),
+                        "Chapter": st.column_config.TextColumn(disabled=True, width="large"),
+                        "Mark Done": st.column_config.CheckboxColumn("✅ Done Revising", default=False)
+                    },
+                    hide_index=True,
+                    use_container_width=True,
+                    key="revision_section_editor"
+                )
+                
+                changed_rev = False
+                for i in range(len(edited_rev)):
+                    if edited_rev.iloc[i]["Mark Done"]:
+                        chap_id = df_rev.iloc[i]["_id"]
+                        db.table("chapters").update({"status": "completed"}).eq("id", chap_id).execute()
+                        changed_rev = True
+                if changed_rev:
+                    st.rerun()
+            else:
+                st.success("🎉 All revision chapters completed! No chapters in revision queue.")
+                
+        with tab_not_done:
+            if not_done_list:
+                df_nd = pd.DataFrame(not_done_list).sort_values(by=["Subject", "Chapter"])
+                st.markdown("Chapters that haven't been started yet. Tick to mark **Done** globally.")
+                edited_nd = st.data_editor(
+                    df_nd[["Subject", "Chapter", "Mark Done"]],
+                    column_config={
+                        "Subject": st.column_config.TextColumn(disabled=True),
+                        "Chapter": st.column_config.TextColumn(disabled=True, width="large"),
+                        "Mark Done": st.column_config.CheckboxColumn("✅ Mark Done", default=False)
+                    },
+                    hide_index=True,
+                    use_container_width=True,
+                    key="not_done_section_editor"
+                )
+                
+                changed_nd = False
+                for i in range(len(edited_nd)):
+                    if edited_nd.iloc[i]["Mark Done"]:
+                        chap_id = df_nd.iloc[i]["_id"]
+                        db.table("chapters").update({"status": "completed"}).eq("id", chap_id).execute()
+                        changed_nd = True
+                if changed_nd:
+                    st.rerun()
+            else:
+                st.success("🎉 No unstarted chapters left!")
+        
     else:
         st.success("🎉 You have completed the entire syllabus! Amazing!")
 
