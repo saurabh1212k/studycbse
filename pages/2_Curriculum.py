@@ -12,10 +12,9 @@ st.title("📘 Curriculum Tracker")
 st.caption("Your master syllabus tracker. Check the boxes to update your progress.")
 st.divider()
 
-db = get_db()
-
 # 1. Sidebar - Select Subject
 try:
+    db = get_db()
     subs_res = db.table("subjects").select("id, name, color_hex").execute()
     if not subs_res.data:
         st.warning("No subjects found. Use the Ingestion Engine to create subjects.")
@@ -27,6 +26,7 @@ try:
     
 except Exception as e:
     st.error(f"Database Error: {e}")
+    st.info("If running on Streamlit Cloud, ensure `SUPABASE_URL` and `SUPABASE_ANON_KEY` are configured in App Settings → Secrets.")
     st.stop()
 
 st.markdown(f"### <span style='color:{selected_sub['color_hex']}'>{selected_sub_name}</span> Chapters", unsafe_allow_html=True)

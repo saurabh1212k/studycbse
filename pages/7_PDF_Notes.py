@@ -13,7 +13,12 @@ st.title("📁 PDF Notes Vault")
 st.caption("Upload and organize your important custom PDF notes.")
 st.divider()
 
-db = get_db()
+try:
+    db = get_db()
+except Exception as e:
+    st.error(f"Database Error: {e}")
+    st.info("If running on Streamlit Cloud, ensure `SUPABASE_URL` and `SUPABASE_ANON_KEY` are configured in App Settings → Secrets.")
+    st.stop()
 
 # 1. Upload Section
 st.subheader("📤 Upload a new PDF")
