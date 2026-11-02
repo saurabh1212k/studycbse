@@ -181,6 +181,28 @@ with st.expander("📚 Action Center & Revision Hub", expanded=True):
         st.success("🎉 You have completed the entire syllabus! Amazing!")
 
 
+# ── Nov 3 – Nov 14 Master Completion Sprint Timetable ────────────────────────
+with st.expander("⚡ Nov 3 – Nov 14 Master Completion Sprint Timetable", expanded=True):
+    st.markdown("""
+    | Date | Phase | 🎯 Primary Target (New Chapter + Notes) | 🔄 Revision Target |
+    | :--- | :--- | :--- | :--- |
+    | **Nov 3** | Phase 1 | **Physics:** Magnetic Effects of Electric Current | **Maths:** Triangles (Theorems & PYQs) |
+    | **Nov 4** | Phase 1 | **Maths:** Circles (Theorems 10.1, 10.2) | **History:** Nationalism in Europe |
+    | **Nov 5** | Phase 1 | **Chemistry:** Carbon and its Compounds | **Maths:** Introduction to Trigonometry |
+    | **Nov 6** | Phase 2 | **Geography:** Minerals and Energy Resources | **Maths:** Some Applications of Trig |
+    | **Nov 7** | Phase 2 | **History:** The Making of a Global World | **Geography:** Agriculture |
+    | **Nov 8** | Phase 2 | **Geography:** Manufacturing Industries | **Civics:** Federalism |
+    | **Nov 9** | Phase 3 | **Maths:** Areas Related to Circles | **Civics:** Gender, Religion and Caste |
+    | **Nov 10** | Phase 3 | **Economics:** Globalisation + Consumer Rights | **Economics:** Money and Credit |
+    | **Nov 11** | Phase 3 | **Maths:** Surface Areas & Volumes + **Bio:** Our Environment | *Quick Formula Sheet Review* |
+    | **Nov 12** | Phase 4 | **Maths:** Statistics + **Civics:** Outcomes of Democracy | *Trig & Circles PYQ Drill* |
+    | **Nov 13** | Phase 4 | **History:** Print Culture + **Geo:** Lifelines | *Science Reactions & Formulas* |
+    | **Nov 14** | Target 🎯 | **Buffer & Audit Day:** Final chapter clearance | **100% CBSE Syllabus Complete! 🏆** |
+    """)
+    st.info("💡 **Daily Routine:** Spend 2.5–3 hours on the Primary Target (NCERT/Lectures + 1-2 page notes) and 45–60 mins on the Revision Target.")
+
+
+
 # ── Initialize session state ───────────────────────────────────────────────────
 if "timer_running"    not in st.session_state: st.session_state.timer_running    = False
 if "timer_seconds"    not in st.session_state: st.session_state.timer_seconds    = 25 * 60
